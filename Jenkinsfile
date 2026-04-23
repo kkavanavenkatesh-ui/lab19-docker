@@ -1,26 +1,19 @@
 pipeline {
-    agent any 
-    
+    agent any
     stages {
-        stage('Docker Build and Test') {
-            agent {
-                docker { 
-                    image 'maven:3.9-eclipse-temurin-17'
-                    // This is key for Windows path stability
-                    reuseNode true
-                }
-            }
+        stage('Clone Code') {
             steps {
-                sh 'mvn clean test'
+                git 'https://github.com/your-repo/sample-app.git'
             }
         }
-    }
-    
-    post {
-        always {
-            // Only run junit if a node is available
-            node('built-in' || 'master') {
-                junit '**/target/surefire-reports/*.xml'
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t my-app .'
+            }
+        }
+        stage('Run Container') {
+            steps {
+                bat 'docker run -d my-app'
             }
         }
     }
